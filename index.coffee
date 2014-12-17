@@ -46,7 +46,7 @@ module.exports = (Module) ->
 			@reminders.push data
 
 			data.timeoutId = setTimeout =>
-				console.log "Reminder for #{data.target}: #{data.task}"
+				console.log "Reminder for #{data.target}: #{data.task}."
 	
 				bot = _.find @getBotManager().bots, (bot) => bot.getName() is data.botName
 	
