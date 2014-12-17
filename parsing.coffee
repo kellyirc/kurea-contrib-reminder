@@ -15,6 +15,18 @@ for key, aliasList of aliases
 
 unitList = Object.keys unitMap
 
+tokens =
+	space:
+		matching: /\s+/g
+		hidden: yes
+
+	number:
+		matching: /\d+(\.\d+)?/g
+		value: (t) -> Number t.text
+
+	word:
+		matching: /\w+/g
+
 class Lexer
 	constructor: (@tokenMap) ->
 
@@ -174,7 +186,15 @@ class ReminderParser extends Parser
 
 		parts.join ' '
 
-module.exports = {
-	unitList, unitMap, aliases
-	Lexer, Parser, ReminderParser
-}
+module.exports = exports = (text) ->
+	l = new Lexer tokens
+	p = new ReminderParser l, text
+	data = p.parse()
+
+exports.unitMap = unitMap
+exports.aliases = aliases
+exports.unitList = unitList
+exports.tokens = tokens
+exports.Lexer = Lexer
+exports.Parser = Parser
+exports.ReminderParser = ReminderParser
