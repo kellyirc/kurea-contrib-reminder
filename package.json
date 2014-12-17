@@ -1,0 +1,12 @@
+{
+  "name": "kurea-reminder",
+  "description": "Reminder module for Kurea",
+  "version": "0.0.0",
+  "license": "MIT",
+  "main": "index.coffee",
+  "author": "Raymond Hammarling",
+  "dependencies": {
+    "underscore": "^1.7.0",
+    "underscore.string": "^2.4.0"
+  }
+}
