@@ -49,23 +49,24 @@ class ReminderParser
 			@isTimeAmount 1
 		]
 
+	parseIn: ->
+		@pullToken() # 'in'
+
+		total = 0
+		(total += @parseTimeAmount()) while @isTimeAmount()
+		total
+
 	isTimeAmount: (offset = 0) ->
 		_.all [
 			(Number @peekToken offset) isnt NaN
 			(@peekToken offset+1) in unitList
 		]
 
-	parseIn: ->
-		@pullToken() # 'in'
-		total = 0
+	parseTimeAmount: ->
+		amount = Number @pullToken() # amount
+		unit = @pullToken() # unit
 
-		while @isTimeAmount()
-			amount = Number @pullToken() # amount
-			unit = @pullToken() # unit
-
-			total += amount * unitMap[unit]
-
-		total
+		amount * unitMap[unit]
 
 module.exports = exports = (text) ->
 	parser = new ReminderParser text
