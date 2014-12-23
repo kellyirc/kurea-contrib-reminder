@@ -3,13 +3,15 @@ _.str = require 'underscore.string'
 
 module.exports = (time) ->
 	timeParts =
-		d: Math.floor(time / (24*60*60*1000))
+		y: Math.floor(time / (365*24*60*60*1000))
+		d: Math.floor(time / (24*60*60*1000)) % 365
 		h: Math.floor(time / (60*60*1000)) % 24
 		m: Math.floor(time / (60*1000)) % 60
 		s: Math.floor(time / 1000) % 60
 		ms: time % 1000
 
 	units =
+		y: ["year", "years"]
 		d: ["day", "days"]
 		h: ["hour", "hours"]
 		m: ["minute", "minutes"]
