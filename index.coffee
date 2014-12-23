@@ -19,8 +19,10 @@ module.exports = (Module) ->
 			# 	@startReminder doc for doc in docs
 	
 			@addRoute 'remind :args', (origin, route) =>
+				{args} = route.params
+
 				try
-					data = parseReminder route.params.args
+					data = parseReminder @stripPunctuation args
 
 					data.own = (data.target is 'me' or data.target is origin.user)
 					data.target = origin.user if data.target is 'me'
@@ -55,6 +57,7 @@ module.exports = (Module) ->
 				bot.say data.target, text
 				bot.notice data.target, text
 			, data.time
-	
+
+		stripPunctuation: (string) -> string.replace /[\.!?]+$/g, ''
 	
 	ReminderModule
