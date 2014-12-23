@@ -32,10 +32,6 @@ module.exports = (Module) ->
 	
 					data.botName = origin.bot.getName()
 	
-					if data.time / (24*60*60*1000) > 24.8
-						@reply origin, "Sorry, you can't set a with a duration greater than 24.8 days for now!"
-						return
-	
 					@reply origin, "Alright, I'll remind #{if data.own then 'you' else data.target} to '#{data.task}' in #{formatTime data.time}!"
 					console.log data
 	
@@ -92,9 +88,19 @@ module.exports = (Module) ->
 			@reminders.push reminder
 
 		schedule: (delay, fn) ->
-			delay = Math.max delay, 0
+			maxDelay = 24 * (24*60*60*1000) # 24 days
 
-			timeoutId = setTimeout fn, delay
+			start = Date.now()
+
+			handle = ->
+				timeoutId = setTimeout (->
+					if start+delay <= Date.now() then fn()
+
+					else handle()
+
+				), (Math.min maxDelay, Math.max delay, 0)
+
+			handle()
 
 			(-> clearTimeout timeoutId) # cancel function
 
