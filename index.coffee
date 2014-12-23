@@ -15,14 +15,17 @@ module.exports = (Module) ->
 	
 			@db = @newDatabase 'reminders'
 	
-			# @db.find {}, (err, docs) =>
-			# 	@startReminder doc for doc in docs
+			@db.find {}, (err, docs) =>
+				return console.error err.stack if err?
+
+				@startReminder doc for doc in docs
 	
 			@addRoute 'remind :args', (origin, route) =>
 				{args} = route.params
 
 				try
 					data = parseReminder @stripPunctuation args
+					data.endTime = Date.now() + data.time
 
 					data.own = (data.target is 'me' or data.target is origin.user)
 					data.target = origin.user if data.target is 'me'
@@ -36,18 +39,41 @@ module.exports = (Module) ->
 					@reply origin, "Alright, I'll remind #{if data.own then 'you' else data.target} to '#{data.task}' in #{formatTime data.time}!"
 					console.log data
 	
-					# @db.insert data, (err) => console.log "Insertion: ", if err? then "ERROR: #{err}" else "OK"
-					@startReminder data
+					@db.insert data, (err, data) =>
+						if err?
+							console.error 'Error while inserting:', err, (new Error).stack
+							return
+
+						console.log "Inserted reminder 'to #{data.task}'"
+
+						@startReminder data
 	
 				catch e
 					@reply origin, "Oh my, there was a problem! #{e.message}"
 					console.error e.stack
+
+		destroy: ->
+			for reminder in @reminders
+				reminder.cancel no
 	
 		startReminder: (data) ->
-			# setTimeout to handle reminder schtuff
-			@reminders.push data
+			delay = data.endTime - Date.now()
 
-			data.timeoutId = setTimeout =>
+			reminder = {data}
+
+			removeReminder = (removeFromDb = yes) =>
+				console.log 'Removing reminder...'
+				i = @reminders.indexOf reminder
+				@reminders[i..i] = []
+
+				if removeFromDb
+					@db.remove {_id: data._id}, {}, (err, numRemoved) ->
+						return console.error err.stack if err?
+
+						console.log "Removed #{numRemoved} reminders from DB"
+
+			cancelSchedule = @schedule delay, =>
+				console.log data
 				console.log "Reminder for #{data.target}: #{data.task}"
 	
 				bot = _.find @getBotManager().bots, (bot) => bot.getName() is data.botName
@@ -56,7 +82,21 @@ module.exports = (Module) ->
 	
 				bot.say data.target, text
 				bot.notice data.target, text
-			, data.time
+
+				removeReminder()
+
+			reminder.cancel = (removeFromDb) ->
+				removeReminder removeFromDb
+				cancelSchedule()
+
+			@reminders.push reminder
+
+		schedule: (delay, fn) ->
+			delay = Math.max delay, 0
+
+			timeoutId = setTimeout fn, delay
+
+			(-> clearTimeout timeoutId) # cancel function
 
 		stripPunctuation: (string) -> string.replace /[\.!?]+$/g, ''
 	
