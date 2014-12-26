@@ -95,6 +95,7 @@ module.exports = (Module) ->
 			maxDelay = 24 * (24*60*60*1000) # 24 days
 
 			start = Date.now()
+			timeoutId = null
 
 			handle = ->
 				timeoutId = setTimeout (->
