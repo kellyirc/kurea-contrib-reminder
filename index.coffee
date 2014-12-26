@@ -40,9 +40,13 @@ module.exports = (Module) ->
 							console.error 'Error while inserting:', err, (new Error).stack
 							return
 
+						console.log data
+
+						data = ([].concat data)[0]
+
 						console.log "Inserted reminder 'to #{data.task}'"
 
-						@startReminder data
+					@startReminder data
 	
 				catch e
 					@reply origin, "Oh my, there was a problem! #{e.message}"
