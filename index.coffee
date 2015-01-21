@@ -92,8 +92,8 @@ module.exports = (Module) ->
 	
 				text = "Hey #{data.target}! #{if data.own then 'You' else data.target} wanted me to remind you to '#{data.task}'!"
 	
-				bot.say data.target, text
 				bot.notice data.target, text
+				bot.say data.target, text
 
 				removeReminder()
 
