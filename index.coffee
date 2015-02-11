@@ -4,6 +4,22 @@ module.exports = (Module) ->
 	# {Lexer, Parser, ReminderParser} = require './parsing'
 	parseReminder = require './parsing'
 	formatTime = require './time-format'
+
+	# The back-in-time lines!
+	backInTimeLines = [
+		"You think this is *%#@ing Back To The Future?"
+		"What the *%#@ do you think this is? Steins;Gate?"
+		"Flux Capacitors are yet to be mass-produced..."
+		"Yeah, I'll just, y'know, totally send you a message back in time. Not a problem."
+		"You're supposed to specify sometime in the future, not the past!"
+		"ERROR: Unable to send D-Mail: Lifter is missing"
+		"Phone Microwave currently out of function, cannot send D-Mail"
+		"If I could time travel, I'd remind <%= target %> to <%= task %> <%= time %> ago. But I can't!"
+		"Yeah, sure, remind <%= target %> to <%= task %> <%= time %> ago, because I TOTALLY can send messages back in time!"
+		"This is just awfully silly of you."
+		"I don't even know what to say."
+		"I suppose you don't have any device that can send messages back in time? Because I don't."
+	]
 	
 	class ReminderModule extends Module
 		shortName: "Reminder"
@@ -25,6 +41,18 @@ module.exports = (Module) ->
 
 				try
 					data = parseReminder @stripPunctuation args
+					if data.time < 0
+						compiled = _.template _.sample backInTimeLines
+
+						templateData =
+							target: if data.own then 'you' else data.target
+							task: data.task
+							time: formatTime -data.time
+
+						@reply origin, compiled(templateData)
+
+						return
+
 					data.endTime = Date.now() + data.time
 
 					data.own = (data.target is 'me' or data.target is origin.user)
