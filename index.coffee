@@ -21,6 +21,14 @@ module.exports = (Module) ->
 		"I suppose you don't have any device that can send messages back in time? Because I don't."
 	]
 	
+	lowerFunc = (func) -> (str) -> func(str.toLowerCase());
+	pronounConversions =
+		'\\b(myself|yourself)\\b': lowerFunc (match) -> if match is 'myself' then 'yourself' else 'myself'
+		'\\b(yours|mine)\\b': lowerFunc (match) -> if match is 'yours' then 'mine' else 'yours'
+		'\\b(your|my)\\b': lowerFunc (match) -> if match is 'your' then 'my' else 'your'
+		'\\b(i|me|you)\\b': lowerFunc (match) -> if (match is 'i' or match is 'me') then 'you' else 'me'
+		'\\b(am|are)\\b': lowerFunc (match) -> if match is 'am' then 'are' else 'am'
+
 	class ReminderModule extends Module
 		shortName: "Reminder"
 	
@@ -57,6 +65,10 @@ module.exports = (Module) ->
 
 					data.own = (data.target is 'me' or data.target is origin.user)
 					data.target = origin.user if data.target is 'me'
+
+					for original, replacement of pronounConversions
+						data.task = data.task.replace new RegExp(original, 'gi'), replacement
+						console.log new RegExp(original).test data.task
 	
 					data.botName = origin.bot.getName()
 	
@@ -108,8 +120,8 @@ module.exports = (Module) ->
 	
 				text = "Hey #{data.target}! #{if data.own then 'You' else data.target} wanted me to remind you to '#{data.task}'!"
 	
-				bot.say data.target, text
 				bot.notice data.target, text
+				bot.say data.target, text
 
 				removeReminder()
 
