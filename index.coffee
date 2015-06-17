@@ -31,6 +31,11 @@ module.exports = (Module) ->
 
 	class ReminderModule extends Module
 		shortName: "Reminder"
+		
+		helpText:
+			default: "Set a reminder for some period of time!"
+		usage:
+			default: "remind [user|me] in [timeframe] to [task]"
 	
 		constructor: (moduleManager) ->
 			super(moduleManager)
