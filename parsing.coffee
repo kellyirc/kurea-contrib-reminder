@@ -53,5 +53,5 @@ class ReminderParser
 
 module.exports = exports = (text) ->
 	parser = new ReminderParser text
-	
+
 	parser.parse()
